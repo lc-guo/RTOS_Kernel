@@ -1,0 +1,100 @@
+#include "FreeRTOS.h"
+
+
+// error 死循环
+static void prvTaskExitError(void)
+{
+    for(;;);
+}
+
+// 初始化栈内存
+StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack,
+                                   TaskFunction_t pxCode,
+                                   void* pvParameters)
+{
+    /* 异常发生时，自动加载到CPU的内容 */
+    pxTopOfStack --;
+    *pxTopOfStack = portINITIAL_XPSR;
+    pxTopOfStack --;
+    *pxTopOfStack = ((StackType_t)pxCode) & portSTART_ADDRESS_MASK;
+    pxTopOfStack --;
+    *pxTopOfStack = (StackType_t)prvTaskExitError;
+		
+    /* r12、r3、r2和r1默认初始化为0 */
+    pxTopOfStack -= 5;
+    *pxTopOfStack = (StackType_t)pvParameters;
+
+    /* 异常发生时，手动加载到CPU的内容 */
+    pxTopOfStack -= 8;
+
+    /* 返回栈顶指针，此时pxTopOfStack指向空闲栈 */
+    return pxTopOfStack;
+}
+
+// 启动第一个任务,实际上是触发SVC中断
+void prvStartFirstTask(void)
+{
+    __asm volatile (
+        // 确保堆栈8字节对齐
+        "tst r0, #0x08 \n"
+        "it eq \n"
+        "subeq r0, r0, #4 \n"
+
+        /* 在cortex-M中，0xE000ED08是SCB_VTOR这个寄存器的地址，里面放的是向量表的向量表的起始地址，即msp的地址 */
+        "ldr r0,=0xE000ED08\n"
+        "ldr r0,[r0]\n"
+        "ldr r0,[r0]\n"
+
+        /* 设置主栈指针msp的值 */
+        "msr msp,r0\n"
+
+        /* 启用全局中断 */
+        "cpsie i\n"
+        "cpsie f\n"
+        "dsb\n"
+        "isb\n"
+        /* 调用SVC启动第一个任务 */
+        "svc 0\n"
+        "nop\n"
+        "nop\n"
+    );
+}
+
+__asm void prvStartFirstTask(void)
+{
+    PRESERVE8
+
+    /* 在cortex-M中，0xE000ED08是SCB_VTOR这个寄存器的地址，里面放的是向量表的向量表的起始地址，即msp的地址 */
+    ldr r0,=0xE000ED08
+    ldr r0,[r0]
+    ldr r0,[r0]
+
+    /* 设置主栈指针msp的值 */
+    msr msp,r0
+
+    /* 启用全局中断 */
+    cpsie i
+    cpsie f
+    dsb
+    isb
+    /* 调用SVC启动第一个任务 */
+    svc 0
+    nop
+    nop
+}
+
+
+// 启动调度器
+BaseType_t xPortStartScheduler(void)
+{
+    // 设置 PendSV 和 SysTick 中断优先级为最低
+    portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
+    portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+
+    // 启动第一个任务，不再返回
+    prvStartFirstTask();
+
+    // 正常不会运行到这里
+    return 0;
+}
+

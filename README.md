@@ -18,7 +18,7 @@ This github repository is the project source code for the FreeRTOS simple kernel
 
 * [FreeRTOS 简单内核实现7 阻塞链表](https://blog.csdn.net/lc_guo/article/details/139680763)
 
-* [FreeRTOS 简单内核实现8 时间片轮询]()
+* [FreeRTOS 简单内核实现8 时间片轮询](https://blog.csdn.net/lc_guo/article/details/139697668)
 
 * ......
 

@@ -21,7 +21,7 @@ StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack,
 	pxTopOfStack --;
 	*pxTopOfStack = portINITIAL_XPSR;
 	pxTopOfStack --;
-	*pxTopOfStack = ((StackType_t)pxCode) & portSTART_ADDRESS_MASK;
+	*pxTopOfStack = ((StackType_t)pxCode);
 	pxTopOfStack --;
 	*pxTopOfStack = (StackType_t)prvTaskExitError;
 
@@ -43,7 +43,8 @@ BaseType_t xPortStartScheduler(void)
 	portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
 	portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
 	
-	// 初始化滴答定时器
+	// 初始化 RTOS 时基
+
 	
 	// 启动第一个任务，不再返回
 	prvStartFirstTask();

@@ -14,7 +14,7 @@
 // 设置内核中断优先级（最低优先级）
 #define configKERNEL_INTERRUPT_PRIORITY         15
 // 设置内核可管理的最大中断优先级
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    11
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    11<<4
 // 设置 RTOS 支持的最大优先级
 #define configMAX_PRIORITIES                    5
 // 支持抢占优先级

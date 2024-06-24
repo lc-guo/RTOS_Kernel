@@ -33,7 +33,7 @@ static List_t volatile *pxOverflow_Delayed_Task_List;
 static volatile BaseType_t xNumOfOverflows = (BaseType_t)0;
 
 // 记录下个任务解除阻塞时间
-static volatile TickType_t xNextTaskUnblockTime = (TickType_t)0U;
+static volatile TickType_t xNextTaskUnblockTime = (TickType_t)portMAX_DELAY;
 
 // 在 main.c 中定义的两个任务声明
 extern TCB_t Task1TCB;
